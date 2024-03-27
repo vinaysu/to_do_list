@@ -1,23 +1,91 @@
-import logo from './logo.svg';
+import { useState } from 'react';
 import './App.css';
+import { TextField, Button } from '@mui/material';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
 
 function App() {
+
+  const [inputDetails, setInputDetails] = useState({ title: '', description: '',disabled:false })
+
+  const [list, setList] = useState([ ])
+  const [count,setCount]=useState(0)
+
+  function handleChange(event) {
+    const { name, value } = event.target;
+    setInputDetails((prev) => ({
+      ...prev,
+      [name]: value
+    }));
+  }
+
+
+  function handleAdd() {
+
+    if (inputDetails.title == '') {
+      alert('Enter the Title')
+      return
+    }
+    
+    setList((prev) => ([...prev, inputDetails]))
+    setInputDetails({title: '', description: '' })
+    setCount(count+1)
+  }
+
+  function handleStrike(index) {
+    // Find the task in the list array
+    const updatedList = list.map((task, i) => {
+      if (i === index) {
+        // If the index matches, update the marked status to true
+        setCount(count==0?0:count-1)
+        return { ...task, marked: true,disabled:true };
+      }
+      return task;
+    });
+
+    // Update the list state with the modified task
+    setList(updatedList);
+  }
+
+  function handleRemove(index) {
+
+    const updatedList = list.filter((ele, i) => i != index)
+    setList(updatedList);
+
+  }
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+
+      <div className='top' >
+        <h1>Enter the Task below</h1>
+        <TextField value={inputDetails.title} onChange={handleChange} className='item' name='title' variant='standard' label='Enter the Title' />
+        <textarea value={inputDetails.description} onChange={handleChange} placeholder='Enter the Description (Optional)' name='description' className='item' ></textarea>
+        <Button onClick={handleAdd} className='item' variant='outlined' >Add to List</Button>
+      </div>
+      <h3>No of Pending Tasks {count}</h3>
+      <hr />
+      <div className='bottom' >
+        <div className='cards' >
+          {
+            list.map((ele, index) =>
+              <div className='card' >
+
+                <div className='section' >
+                  <h2 className='one' style={{ textDecoration: ele.marked ? 'line-through' : 'none', color: ele.marked ? 'black' : 'red', }}>{ele.title}</h2>
+                 {ele.disabled?'':<CheckBoxIcon  className='one' onClick={() => handleStrike(index)} sx={{ cursor: 'pointer' }} />} 
+                </div>
+                <blockquote className='one' >{ele.description}</blockquote>
+                <Button className='one' onClick={() => handleRemove(index)} variant='outlined'  >Remove</Button>
+
+
+              </div>
+            )
+          }
+
+        </div>
+
+      </div>
+
     </div>
   );
 }
