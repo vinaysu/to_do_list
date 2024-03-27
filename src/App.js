@@ -62,7 +62,13 @@ function App() {
 
   function handleRemove(index) {
 
-    const updatedList = list.filter((ele, i) => i != index)
+    const itemToRemove = list[index];
+    if (!itemToRemove.marked) {
+      setCount(prevCount => prevCount - 1);
+    }
+
+    const updatedList = list.filter((ele, i) => i !== index)
+   
     setList(updatedList);
 
   }
