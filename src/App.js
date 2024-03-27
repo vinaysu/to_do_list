@@ -1,14 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './App.css';
 import { TextField, Button } from '@mui/material';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 
 function App() {
 
-  const [inputDetails, setInputDetails] = useState({ title: '', description: '',disabled:false })
-
-  const [list, setList] = useState([ ])
-  const [count,setCount]=useState(0)
+  const [inputDetails, setInputDetails] = useState({ title: '', description: '', disabled: false })
+  const [list, setList] = useState(() => {
+    const storedList = JSON.parse(localStorage.getItem('taskList'));
+    return storedList || [];
+  });
+  const [count, setCount] = useState(0)
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -17,6 +19,18 @@ function App() {
       [name]: value
     }));
   }
+  useEffect(() => {
+    const storedList = JSON.parse(localStorage.getItem('taskList'));
+    if (storedList) {
+      setList(storedList);
+      setCount(storedList.filter(task => !task.marked).length);
+    }
+  }, []);
+
+  // Function to save the list to local storage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('taskList', JSON.stringify(list));
+  }, [list]);
 
 
   function handleAdd() {
@@ -25,10 +39,10 @@ function App() {
       alert('Enter the Title')
       return
     }
-    
+
     setList((prev) => ([...prev, inputDetails]))
-    setInputDetails({title: '', description: '' })
-    setCount(count+1)
+    setInputDetails({ title: '', description: '' })
+    setCount(count + 1)
   }
 
   function handleStrike(index) {
@@ -36,8 +50,8 @@ function App() {
     const updatedList = list.map((task, i) => {
       if (i === index) {
         // If the index matches, update the marked status to true
-        setCount(count==0?0:count-1)
-        return { ...task, marked: true,disabled:true };
+        setCount(count == 0 ? 0 : count - 1)
+        return { ...task, marked: true, disabled: true };
       }
       return task;
     });
@@ -72,7 +86,7 @@ function App() {
 
                 <div className='section' >
                   <h2 className='one' style={{ textDecoration: ele.marked ? 'line-through' : 'none', color: ele.marked ? 'black' : 'red', }}>{ele.title}</h2>
-                 {ele.disabled?'':<CheckBoxIcon  className='one' onClick={() => handleStrike(index)} sx={{ cursor: 'pointer' }} />} 
+                  {ele.disabled ? '' : <CheckBoxIcon className='one' onClick={() => handleStrike(index)} sx={{ cursor: 'pointer' }} />}
                 </div>
                 <blockquote className='one' >{ele.description}</blockquote>
                 <Button className='one' onClick={() => handleRemove(index)} variant='outlined'  >Remove</Button>
