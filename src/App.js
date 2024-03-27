@@ -10,7 +10,10 @@ function App() {
     const storedList = JSON.parse(localStorage.getItem('taskList'));
     return storedList || [];
   });
+
+  
   const [count, setCount] = useState(0)
+  const [password,setPassword]=useState('')
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -21,6 +24,7 @@ function App() {
   }
   useEffect(() => {
     const storedList = JSON.parse(localStorage.getItem('taskList'));
+    sessionStorage.setItem('loginStatus', JSON.stringify(false));
     if (storedList) {
       setList(storedList);
       setCount(storedList.filter(task => !task.marked).length);
@@ -35,6 +39,13 @@ function App() {
 
   function handleAdd() {
 
+    let status = JSON.parse(sessionStorage.getItem('loginStatus'));
+    if (status == false) {
+      window.alert(' Please login')
+      setInputDetails({ title: '', description: '' })
+      return
+    }
+
     if (inputDetails.title == '') {
       alert('Enter the Title')
       return
@@ -46,6 +57,12 @@ function App() {
   }
 
   function handleStrike(index) {
+
+    let status = JSON.parse(sessionStorage.getItem('loginStatus'));
+    if (status == false) {
+      window.alert(' Please login ')
+      return
+    }
     // Find the task in the list array
     const updatedList = list.map((task, i) => {
       if (i === index) {
@@ -62,21 +79,42 @@ function App() {
 
   function handleRemove(index) {
 
+    let status = JSON.parse(sessionStorage.getItem('loginStatus'));
+    if (status == false) {
+      window.alert('Please login ')
+      return
+    }
+
     const itemToRemove = list[index];
     if (!itemToRemove.marked) {
       setCount(prevCount => prevCount - 1);
     }
 
     const updatedList = list.filter((ele, i) => i !== index)
-   
+
     setList(updatedList);
 
   }
 
+  function handleLogin(){
+    if(password!=="1234"){
+      window.alert('Enter the correct Password')
+      return
+    }
+    sessionStorage.setItem('loginStatus', JSON.stringify(true));
+    window.alert('LoggedIn Successfully')
+    setPassword('')
+  }
+
+  function handleLoginChange(event){
+      setPassword(event.target.value)
+  }
+
   return (
     <div className="App">
-
+      <button onClick={handleLogin} >login Here</button><input value={password} onChange={handleLoginChange}  placeholder='Enter the password here' />
       <div className='top' >
+
         <h1>Enter the Task below</h1>
         <TextField value={inputDetails.title} onChange={handleChange} className='item' name='title' variant='standard' label='Enter the Title' />
         <textarea value={inputDetails.description} onChange={handleChange} placeholder='Enter the Description (Optional)' name='description' className='item' ></textarea>
